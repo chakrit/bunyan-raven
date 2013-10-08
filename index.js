@@ -9,6 +9,8 @@ module.exports = (function(undefined) {
   function RavenStream(client) {
     assert(client != null, "Please provide a raven client.");
     Writable.call(this, { objectMode: true });
+
+    this.client = client;
   }
 
   util.inherits(RavenStream, Writable);
@@ -25,7 +27,7 @@ module.exports = (function(undefined) {
       err = new Error(record.msg);
     }
 
-    client.captureError(err);
+    this.client.captureError(err);
     callback(null);
   };
 
