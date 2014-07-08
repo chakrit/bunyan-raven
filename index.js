@@ -23,8 +23,7 @@ module.exports = (function(undefined) {
     var err = record.err;
 
     if (!err) {
-      var message = record.msg + " (" + err.message + ")";
-      this.client.captureMessage(message);
+      this.client.captureMessage(record.msg);
       return callback(null);
     }
 
