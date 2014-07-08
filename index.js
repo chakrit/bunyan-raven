@@ -50,8 +50,31 @@ module.exports = (function(undefined) {
     var tags = ['name', 'hostname', 'pid', 'level'];
     tags.forEach(function(tag) { options.tags[tag] = record[tag]; });
 
+    // Add 'extra' meta-data from record
+    var skip = ['msg', 'time', 'v', 'err'];
+    for (var key in record) {
+      if (tags.indexOf(key) != -1) continue;
+      if (skip.indexOf(key) != -1) continue;
+      options.extra[key] = JSON.stringify(record[key], safeCycles());
+    }
     return options;
   };
+  
+  // A JSON stringifier that handles cycles safely.
+  // Usage: JSON.stringify(obj, safeCycles())
+  function safeCycles() {
+      var seen = [];
+      return function (key, val) {
+          if (!val || typeof (val) !== 'object') {
+              return val;
+          }
+          if (seen.indexOf(val) !== -1) {
+              return '[Circular]';
+          }
+          seen.push(val);
+          return val;
+      };
+  }
 
   return RavenStream;
 
