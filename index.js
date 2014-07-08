@@ -21,14 +21,26 @@ module.exports = (function(undefined) {
     // showing up on sentry as well or at least also logs the message itself if no error
     // object are provided.
     var err = record.err;
-    if (err) {
-      err.message = record.msg + " (" + err.message + ")";
-    } else {
-      err = new Error(record.msg);
+
+    if (!err) {
+      var message = record.msg + " (" + err.message + ")";
+      this.client.captureMessage(message);
+      return callback(null);
     }
 
-    this.client.captureError(err);
-    callback(null);
+    if (err instanceof Error) {
+      this.client.captureError(err);
+      return callback(null);
+    }
+
+    // Bunyan's serializer kicks in in some cases which requires reconverting the object to an error
+    var convertedError = new Error(err.message);
+    convertedError.name = err.name;
+    convertedError.code = err.code;
+    convertedError.signal = err.signal;
+    convertedError.stack = err.stack;
+    this.client.captureError(convertedError);
+    return callback(null);
   };
 
   return RavenStream;
