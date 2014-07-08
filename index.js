@@ -27,6 +27,10 @@ module.exports = (function(undefined) {
       this.client.captureMessage(record.msg, options);
       return callback(null);
     }
+    
+    if (record.msg) {
+      err.message = record.msg + " (" + err.message + ")";
+    }
 
     if (err instanceof Error) {
       this.client.captureError(err, options);
@@ -59,7 +63,7 @@ module.exports = (function(undefined) {
     }
     return options;
   };
-  
+
   // A JSON stringifier that handles cycles safely.
   // Usage: JSON.stringify(obj, safeCycles())
   function safeCycles() {
