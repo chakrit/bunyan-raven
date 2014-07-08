@@ -21,14 +21,15 @@ module.exports = (function(undefined) {
     // showing up on sentry as well or at least also logs the message itself if no error
     // object are provided.
     var err = record.err;
+    var options = this._gatherRavenMetaData(record);
 
     if (!err) {
-      this.client.captureMessage(record.msg);
+      this.client.captureMessage(record.msg, options);
       return callback(null);
     }
 
     if (err instanceof Error) {
-      this.client.captureError(err);
+      this.client.captureError(err, options);
       return callback(null);
     }
 
@@ -38,8 +39,18 @@ module.exports = (function(undefined) {
     convertedError.code = err.code;
     convertedError.signal = err.signal;
     convertedError.stack = err.stack;
-    this.client.captureError(convertedError);
+    this.client.captureError(convertedError, options);
     return callback(null);
+  };
+
+  RavenStream.prototype._gatherRavenMetaData = function(record) {
+    var options = {tags: {}, extra: {}};
+
+    // Add tags
+    var tags = ['name', 'hostname', 'pid', 'level'];
+    tags.forEach(function(tag) { options.tags[tag] = record[tag]; });
+
+    return options;
   };
 
   return RavenStream;
