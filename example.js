@@ -37,6 +37,21 @@ module.exports = (function() {
   log.debug({ err: err() }, "debug with obj!");
   log.trace({ err: err() }, "trace with obj!");
 
+  log.error(new Error("This gets picked up by Bunyan's serializer"));
+  log.error("This is send as a message to Raven");
+
+  // Send additional data as 'extra' to Raven/GetSentry
+  log.error({myCustomField: 'I like dolphins', err: err()});
+  log.error({myCustomField: 'I like dolphins'}, 'error message');
+
+  // Circular objects are safely catched
+  function Foo() {
+    this.abc = "Hello";
+    this.circular = this;
+  }
+  var foo = new Foo();
+  logger.error({err: err(), foo: foo});
+
   for (var i = 0; i < 10; i++) log.trace("flood!");
 
   // wait for sentry to flush before letting app dies

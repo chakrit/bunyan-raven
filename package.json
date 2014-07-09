@@ -1,6 +1,6 @@
 {
   "name": "bunyan-raven",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A bunyan-compatible stream interface that sends error logs to raven-node.",
   "main": "index.js",
   "dependencies": {},
