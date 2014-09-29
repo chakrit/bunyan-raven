@@ -6,7 +6,6 @@
   "dependencies": {},
   "devDependencies": {},
   "peerDependencies": {
-    "bunyan": "<2",
     "raven": "0.x"
   },
   "scripts": {
