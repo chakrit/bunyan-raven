@@ -6,6 +6,14 @@ module.exports = (function(undefined) {
     , assert = require('assert')
     , Writable = require('stream').Writable;
 
+  var nameFromLevel = [];
+  nameFromLevel[10] = 'trace';
+  nameFromLevel[20] = 'debug';
+  nameFromLevel[30] = 'info';
+  nameFromLevel[40] = 'warning';
+  nameFromLevel[50] = 'error';
+  nameFromLevel[60] = 'fatal';
+
   function RavenStream(client) {
     assert(client != null, "Please provide a raven client.");
     Writable.call(this, { objectMode: true });
@@ -21,13 +29,19 @@ module.exports = (function(undefined) {
     // showing up on sentry as well or at least also logs the message itself if no error
     // object are provided.
     var err = record.err;
+
+    // Get level value string, since bunyan uses numbers for levels
+    if (record.level && typeof record.level === 'number') {
+      record.level = nameFromLevel[record.level];
+    }
+
     var options = this._gatherRavenMetaData(record);
 
     if (!err) {
       this.client.captureMessage(record.msg, options);
       return callback(null);
     }
-    
+
     if (record.msg) {
       err.message = record.msg + " (" + err.message + ")";
     }
@@ -49,13 +63,15 @@ module.exports = (function(undefined) {
 
   RavenStream.prototype._gatherRavenMetaData = function(record) {
     var options = {tags: {}, extra: {}};
+    // Level doesn't go in tags or extra
+    options.level = record.level;
 
     // Add tags
-    var tags = ['name', 'hostname', 'pid', 'level'];
+    var tags = ['name', 'hostname', 'pid'];
     tags.forEach(function(tag) { options.tags[tag] = record[tag]; });
 
     // Add 'extra' meta-data from record
-    var skip = ['msg', 'time', 'v', 'err'];
+    var skip = ['msg', 'time', 'v', 'err', 'level'];
     for (var key in record) {
       if (tags.indexOf(key) != -1) continue;
       if (skip.indexOf(key) != -1) continue;
