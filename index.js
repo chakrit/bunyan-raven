@@ -47,7 +47,7 @@ module.exports = (function(undefined) {
     }
 
     if (err instanceof Error) {
-      this.client.captureError(err, options);
+      this.client.captureException(err, options);
       return callback(null);
     }
 
@@ -57,7 +57,7 @@ module.exports = (function(undefined) {
     convertedError.code = err.code;
     convertedError.signal = err.signal;
     convertedError.stack = err.stack;
-    this.client.captureError(convertedError, options);
+    this.client.captureException(convertedError, options);
     return callback(null);
   };
 
